@@ -1,20 +1,48 @@
 import React from "react";
 import { Button, Form, Modal } from "react-bootstrap";
+import { useForm } from "react-hook-form";
+import { Note } from "../models/noteModel";
+import { NoteInput } from "../network/notes_api";
+import * as NoteApi from "../network/notes_api";
 
 interface AddNoteDialogProps {
     onDismiss: () => void;
+    onNoteSaved: (note: Note) => void;
 }
-const AddNoteDialog = ({ onDismiss }: AddNoteDialogProps) => {
+const AddNoteDialog = ({ onDismiss, onNoteSaved }: AddNoteDialogProps) => {
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<NoteInput>();
+
+    async function onSubmit(input: NoteInput) {
+        try {
+            const noteResponse = await NoteApi.createNote(input);
+            onNoteSaved(noteResponse);
+        } catch (error) {
+            console.error(error);
+            alert(error);
+        }
+    }
     return (
         <Modal show onHide={onDismiss}>
             <Modal.Header closeButton>
                 <Modal.Title>Add Note</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form id="addNoteForm">
+                <Form id="addNoteForm" onSubmit={handleSubmit(onSubmit)}>
                     <Form.Group className="mb-3">
                         <Form.Label>Title</Form.Label>
-                        <Form.Control type="text" placeholder="Title" />
+                        <Form.Control
+                            type="text"
+                            placeholder="Title"
+                            isInvalid={!!errors.title}
+                            {...register("title", { required: "Required" })}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {errors.title?.message}
+                        </Form.Control.Feedback>
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>Text</Form.Label>
@@ -22,12 +50,18 @@ const AddNoteDialog = ({ onDismiss }: AddNoteDialogProps) => {
                             as="textarea"
                             placeholder="Text"
                             rows={5}
+                            {...register("text")}
                         />
                     </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button type="submit" form="addNoteForm">save note</Button>
+                <Button
+                    type="submit"
+                    form="addNoteForm"
+                    disabled={isSubmitting}>
+                    save note
+                </Button>
             </Modal.Footer>
         </Modal>
     );
