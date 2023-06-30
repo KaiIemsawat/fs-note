@@ -35,7 +35,12 @@ interface CreateNoteBody {
     text?: string;
 }
 
-export const createNote: RequestHandler<unknown, unknown, CreateNoteBody, unknown> = async (req, resp, next) => {
+export const createNote: RequestHandler<
+    unknown,
+    unknown,
+    CreateNoteBody,
+    unknown
+> = async (req, resp, next) => {
     const title = req.body.title;
     const text = req.body.text;
 
@@ -55,7 +60,7 @@ export const createNote: RequestHandler<unknown, unknown, CreateNoteBody, unknow
 };
 
 interface UpdateNoteParams {
-    noteId: string,
+    noteId: string;
 }
 
 interface UpdateNoteBody {
@@ -63,7 +68,12 @@ interface UpdateNoteBody {
     text?: string;
 }
 
-export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBody, unknown> = async (req, resp, next) => {
+export const updateNote: RequestHandler<
+    UpdateNoteParams,
+    unknown,
+    UpdateNoteBody,
+    unknown
+> = async (req, resp, next) => {
     const noteId = req.params.noteId;
     const newTitle = req.body.title;
     const newText = req.body.text;
@@ -94,10 +104,8 @@ export const updateNote: RequestHandler<UpdateNoteParams, unknown, UpdateNoteBod
     }
 };
 
-
 export const deleteNote: RequestHandler = async (req, resp, next) => {
     const noteId = req.params.noteId;
-
 
     try {
         if (!mongoose.isValidObjectId(noteId)) {
@@ -109,7 +117,7 @@ export const deleteNote: RequestHandler = async (req, resp, next) => {
             throw createHttpError(404, "Note not found");
         }
 
-        await NoteModel.findByIdAndDelete({_id: noteId}); // note.remove() is not work !!
+        await NoteModel.findByIdAndDelete({ _id: noteId }); // note.remove() is not work !!
 
         resp.sendStatus(204);
     } catch (error) {
